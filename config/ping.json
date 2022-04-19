@@ -1,0 +1,52 @@
+[
+  {
+    "block_num": 1000,
+    "block_size": 1300,
+    "block_gap": 0.001,
+    "block_ddl": 200,
+    "block_prio": 0,
+    "trace_file_name": "trace_1300_1ms_1000.txt"
+  },
+  {
+    "block_num": 1000,
+    "block_size": 1300,
+    "block_gap": 0.001,
+    "block_ddl": 200,
+    "block_prio": {
+      "type": "seq",
+      "seq": [0, 1, 2]
+    },
+    "trace_file_name": "trace_1300_1ms_1000_seq012.txt"
+  },
+  {
+    "block_num": 1000,
+    "block_size": 1300,
+    "block_gap": 0.001,
+    "block_ddl": 200,
+    "block_prio": {
+      "type": "random",
+      "random": {
+        "seed": 2022,
+        "distribution": "integers",
+        "max": 3
+      }
+    },
+    "trace_file_name": "trace_1300_1ms_1000_randint3.txt"
+  },
+  {
+    "block_num": 1000,
+    "block_size": 1300,
+    "block_gap": 0.001,
+    "block_ddl": 200,
+    "block_prio": {
+      "type": "random",
+      "random": {
+        "seed": 2022,
+        "distribution": "choice",
+        "choices": [0, 1, 2],
+        "probability": [0.1, 0.2, 0.7]
+      }
+    },
+    "trace_file_name": "trace_1300_1ms_1000_randchoice127.txt"
+  }
+]
