@@ -2,6 +2,10 @@
 
 ## Prerequisites
 
+### python
+
+需要 python >= 3.10，因为使用到了较新的语言特性
+
 ### pdm
 
 pdm 是一个类似 npm、cargo 的 python 依赖管理工具。参见 [文档](https://pdm.fming.dev/) 进行安装。

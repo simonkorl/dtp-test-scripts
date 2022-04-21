@@ -4,7 +4,7 @@ version = ""
 description = ""
 authors = [{ name = "Campbell He", email = "campbell.he@icloud.com" }]
 dependencies = ["numpy>=1.22.3", "matplotlib>=3.5.1", "pandas>=1.4.2"]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 [project.optional-dependencies]
 
