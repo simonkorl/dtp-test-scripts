@@ -110,6 +110,15 @@ requires_python = ">=3.7"
 summary = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 
 [[package]]
+name = "polars"
+version = "0.13.24"
+requires_python = ">=3.7"
+summary = "Blazingly fast DataFrame library"
+dependencies = [
+    "numpy>=1.16.0",
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.0.8"
 requires_python = ">=3.6.8"
@@ -143,7 +152,7 @@ summary = "A lil' TOML parser"
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:7ef0eff8a0ea2551f6a04fbc2cf32857205c59984ba0941b359c194d9a1f7fa7"
+content_hash = "sha256:4ae8da36febd309a159e8bee64b073d9b700dd77f5c53cf2f1301106ae7b2591"
 
 [metadata.files]
 "black 22.3.0" = [
@@ -369,6 +378,13 @@ content_hash = "sha256:7ef0eff8a0ea2551f6a04fbc2cf32857205c59984ba0941b359c194d9
 "platformdirs 2.5.2" = [
     {file = "platformdirs-2.5.2-py3-none-any.whl", hash = "sha256:027d8e83a2d7de06bbac4e5ef7e023c02b863d7ea5d079477e722bb41ab25788"},
     {file = "platformdirs-2.5.2.tar.gz", hash = "sha256:58c8abb07dcb441e6ee4b11d8df0ac856038f944ab98b7be6b27b2a3c7feef19"},
+]
+"polars 0.13.24" = [
+    {file = "polars-0.13.24-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:2ab35458b8281921df45c550fb94601fa7f44d6b683d1f73c21c95d82bd30602"},
+    {file = "polars-0.13.24-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:3a2b1abab14fc365a043eefdd7f5157287aa9ea13fb220bd0744cfbb8fa32f1a"},
+    {file = "polars-0.13.24-cp37-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:09f635bfdfa16d06c168b8b1e4bdb4f074ca3e6709dc15c24d288d11841423f1"},
+    {file = "polars-0.13.24-cp37-abi3-win_amd64.whl", hash = "sha256:babf683b95b8e9df8ab68789b0d3146c6bca843ef4b3fa396f3ebbf942154d66"},
+    {file = "polars-0.13.24.tar.gz", hash = "sha256:2ecb9c1e37eb77b86d29b76d7f722e8c65b19486e2f57abff492335f2cb6b89f"},
 ]
 "pyparsing 3.0.8" = [
     {file = "pyparsing-3.0.8-py3-none-any.whl", hash = "sha256:ef7b523f6356f763771559412c0d7134753f037822dad1b16945b7b846f7ad06"},

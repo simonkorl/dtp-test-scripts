@@ -65,12 +65,16 @@ def generate_trace(config):
     match config["block_size"]:
         case {"type": "random", "random": r}:
             block_size = generate_random(r, block_num)
+        case {"type": "seq", "seq": s}:
+            block_size = [s[i % len(s)] for i in range(block_num)]
         case _:
             block_size = np.full(block_num, int(config["block_size"]))
 
     match config["block_gap"]:
         case {"type": "random", "random": r}:
             block_gap = generate_random(r, block_num)
+        case {"type": "seq", "seq": s}:
+            block_gap = [s[i % len(s)] for i in range(block_num)]
         case _:
             block_gap = np.full(block_num, float(config["block_gap"]))
 
