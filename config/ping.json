@@ -1,11 +1,27 @@
 [
   {
+    "block_num": 1,
+    "block_size": 1300,
+    "block_gap": 0.001,
+    "block_ddl": 200,
+    "block_prio": 0,
+    "trace_file_name": "trace_1300_1.txt"
+  },
+  {
     "block_num": 1000,
     "block_size": 1300,
     "block_gap": 0.001,
     "block_ddl": 200,
     "block_prio": 0,
     "trace_file_name": "trace_1300_1ms_1000.txt"
+  },
+  {
+    "block_num": 500,
+    "block_size": 1300,
+    "block_gap": 0.001,
+    "block_ddl": 200,
+    "block_prio": 0,
+    "trace_file_name": "trace_1300_1ms_500.txt"
   },
   {
     "block_num": 1000,
@@ -48,5 +64,35 @@
       }
     },
     "trace_file_name": "trace_1300_1ms_1000_randchoice127.txt"
+  },
+  {
+    "block_num": 1000,
+    "block_size": 1000000,
+    "block_gap": 0.001,
+    "block_ddl": 1000,
+    "block_prio": 0,
+    "trace_file_name": "trace_1M_1ms_1000.txt"
+  },
+  {
+    "block_num": 500,
+    "block_size": 1000000,
+    "block_gap": 0.001,
+    "block_ddl": 1000,
+    "block_prio": 0,
+    "trace_file_name": "trace_1M_1ms_500.txt"
+  },
+  {
+    "block_num": 10,
+    "block_size": 13000,
+    "block_gap": 0.001,
+    "block_ddl": {
+      "type": "seq",
+      "seq": [100, 200, 400, 800, 1600, 3200]
+    },
+    "block_prio": {
+      "type": "seq",
+      "seq": [0, 1, 2, 3, 5, 7]
+    },
+    "trace_file_name": "trace_test_tos.txt"
   }
 ]
