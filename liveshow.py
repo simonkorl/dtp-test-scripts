@@ -75,7 +75,9 @@ def parse_result(result_file_name: str) -> pl.DataFrame:
 
 
 class UpdateData:
-    def __init__(self, ax: Axes, trace_file_name: str, result_file_name: str):
+    def __init__(
+        self, ax: Axes, trace_file_name: str, result_file_name: str, title: str
+    ):
         self.trace = parse_trace(trace_file_name)
         self.result_file_name = result_file_name
         self.ax = ax
@@ -88,6 +90,7 @@ class UpdateData:
         self.ax.set_ylim(0, 1.05)
         self.ax.set_xlabel("Time (s)")
         self.ax.set_ylabel("Average In-time Ratio")
+        self.ax.set_title(title)
         self.ax.legend()
 
     def __call__(self, frame):
@@ -131,11 +134,12 @@ parser.add_argument("-t", "--trace", type=str, help="trace file", default="trace
 parser.add_argument(
     "-r", "--result", type=str, help="result file", default="result.csv"
 )
+parser.add_argument("--title", type=str, help="title", default="Live Show")
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
     fig, ax = plt.subplots()
-    update_data = UpdateData(ax, args.trace, args.result)
+    update_data = UpdateData(ax, args.trace, args.result, args.title)
     anim = FuncAnimation(fig, update_data, interval=500)
     plt.show()
