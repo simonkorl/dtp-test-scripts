@@ -69,9 +69,14 @@ def parse_result(result_file_name: str) -> pl.DataFrame:
         - deadline
         - duration
     """
-    result = pl.read_csv(result_file_name)
-    result["block_id"] = result["block_id"].apply(lambda x: (x >> 2) - 1)
-    return result
+    try:
+        result = pl.read_csv(result_file_name)
+        result["block_id"] = result["block_id"].apply(lambda x: (x >> 2) - 1)
+        return result
+    except:
+        return pl.DataFrame(
+            None, ["block_id", "bct", "size", "priority", "deadline", "duration"]
+        )
 
 
 class UpdateData:
@@ -105,6 +110,8 @@ class UpdateData:
         # 一个简单粗暴的版本，没有增量更新
         # 其实可以做，但是直接复制比较无脑
         result = parse_result(self.result_file_name)
+        if result.is_empty():
+            return np.array([0]), np.array([[], [], []])
         result = result.join(self.trace, left_on="block_id", right_on="id", how="outer")
         result = result.filter(pl.col("duration") != None).select(
             [
