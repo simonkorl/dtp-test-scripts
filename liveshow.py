@@ -8,6 +8,8 @@ import polars as pl
 from matplotlib.animation import FuncAnimation
 from matplotlib.axes import Axes
 
+plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP"]
+
 
 def parse_trace(trace_file_name: str) -> pl.DataFrame:
     """
@@ -89,12 +91,18 @@ class UpdateData:
         self.lines = []
         for i in range(2):
             self.lines.append(self.ax.plot([], [], label=f"Prio {i}")[0])
+        self.table = self.ax.table(
+            colLabels=("整体", "高优先", "低优先"),
+            rowLabels=["平均块完成时间"],
+            cellText=[["NA", "NA", "NA"]],
+            bbox=[0.1, -0.4, 0.9, 0.2],
+        )
 
         # plot parameters
         self.ax.set_xlim(0, 1)
         self.ax.set_ylim(0, 1.05)
-        self.ax.set_xlabel("Time (s)")
-        self.ax.set_ylabel("Average In-time Ratio")
+        self.ax.set_xlabel("时间 (s)")
+        self.ax.set_ylabel("及时到达率")
         self.ax.set_title(title)
         self.ax.legend()
 
@@ -111,12 +119,29 @@ class UpdateData:
         # 其实可以做，但是直接复制比较无脑
         result = parse_result(self.result_file_name)
         if result.is_empty():
+            self.table[1, 0].get_text().set_text("NA")
+            self.table[1, 1].get_text().set_text("NA")
+            self.table[1, 2].get_text().set_text("NA")
             return np.array([0]), np.array([[], [], []])
+
         result = result.join(self.trace, left_on="block_id", right_on="id", how="outer")
+
+        agg = result.select(
+            [
+                pl.col("bct").mean().alias("avg"),
+                pl.col("bct").filter(pl.col("prio") == 1).mean().alias("high"),
+                pl.col("bct").filter(pl.col("prio") == 2).mean().alias("low"),
+            ]
+        )
+
+        self.table[1, 0].get_text().set_text("{:.2f}ms".format(agg["avg"][0]))
+        self.table[1, 1].get_text().set_text("{:.2f}ms".format(agg["high"][0]))
+        self.table[1, 2].get_text().set_text("{:.2f}ms".format(agg["low"][0]))
+
         result = result.filter(pl.col("duration") != None).select(
             [
                 "block_id",
-                (pl.col("bct") / 1000 < pl.col("ddl")).alias("intime"),
+                (pl.col("bct") < pl.col("ddl")).alias("intime"),
                 "prio",
                 "ddl",
                 (pl.col("ddl") / 1000 + pl.col("start")).alias("timestamp"),
@@ -147,6 +172,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     fig, ax = plt.subplots()
+    plt.subplots_adjust(bottom=0.3)
     update_data = UpdateData(ax, args.trace, args.result, args.title)
     anim = FuncAnimation(fig, update_data, interval=500)
     plt.show()
