@@ -78,9 +78,9 @@ def parse_result(result_file_name: str) -> pl.DataFrame:
 
     def find_info(line: str):
         if m := re.match(re_complete_pattern, line):
-            return ((int(m.group(1)) - 1) // 4 - 1, "complete")
+            return ((int(m.group(1)) >> 2) - 1, "complete")
         elif m := re.match(re_cancel_pattern, line):
-            return ((int(m.group(1)) - 1) // 4 - 1, "cancel")
+            return ((int(m.group(1)) >> 2) - 1, "cancel")
         else:
             return None
 

@@ -93,8 +93,8 @@ class UpdateData:
             self.lines.append(self.ax.plot([], [], label=f"Prio {i}")[0])
         self.table = self.ax.table(
             colLabels=("整体", "高优先", "低优先"),
-            rowLabels=["平均块完成时间"],
-            cellText=[["NA", "NA", "NA"]],
+            rowLabels=["块到达率", "平均块完成时间"],
+            cellText=[["NA", "NA", "NA"], ["NA", "NA", "NA"]],
             bbox=[0.1, -0.4, 0.9, 0.2],
         )
 
@@ -122,30 +122,78 @@ class UpdateData:
             self.table[1, 0].get_text().set_text("NA")
             self.table[1, 1].get_text().set_text("NA")
             self.table[1, 2].get_text().set_text("NA")
+            self.table[2, 0].get_text().set_text("NA")
+            self.table[2, 1].get_text().set_text("NA")
+            self.table[2, 2].get_text().set_text("NA")
             return np.array([0]), np.array([[], [], []])
 
         result = result.join(self.trace, left_on="block_id", right_on="id", how="outer")
 
         agg = result.select(
             [
-                pl.col("bct").mean().alias("avg"),
-                pl.col("bct").filter(pl.col("prio") == 1).mean().alias("high"),
-                pl.col("bct").filter(pl.col("prio") == 2).mean().alias("low"),
+                pl.col("bct").filter(pl.col("bct") < 1000000).mean().alias("avg"),
+                pl.col("bct")
+                .filter((pl.col("bct") < 1000000) & (pl.col("prio") == 1))
+                .mean()
+                .alias("high"),
+                pl.col("bct")
+                .filter((pl.col("bct") < 1000000) & (pl.col("prio") == 2))
+                .mean()
+                .alias("low"),
+                (
+                    pl.col("bct").filter(pl.col("bct") < pl.col("ddl")).count()
+                    / pl.col("bct").count()
+                ).alias("arrive"),
+                (
+                    pl.col("bct")
+                    .filter((pl.col("prio") == 1) & (pl.col("bct") < pl.col("ddl")))
+                    .count()
+                    / pl.col("bct").filter(pl.col("prio") == 1).count()
+                ).alias("high arrive"),
+                (
+                    pl.col("bct")
+                    .filter((pl.col("prio") == 2) & (pl.col("bct") < pl.col("ddl")))
+                    .count()
+                    / pl.col("bct").filter(pl.col("prio") == 2).count()
+                ).alias("low arrive"),
             ]
         )
 
-        self.table[1, 0].get_text().set_text("{:.2f}ms".format(agg["avg"][0]))
-        self.table[1, 1].get_text().set_text("{:.2f}ms".format(agg["high"][0]))
-        self.table[1, 2].get_text().set_text("{:.2f}ms".format(agg["low"][0]))
+        self.table[1, 0].get_text().set_text(
+            "{:.2f}%".format(agg["arrive"][0] * 100) if agg["arrive"][0] else "NA"
+        )
+        self.table[1, 1].get_text().set_text(
+            "{:.2f}%".format(agg["high arrive"][0] * 100)
+            if agg["high arrive"][0]
+            else "NA"
+        )
+        self.table[1, 2].get_text().set_text(
+            "{:.2f}%".format(agg["low arrive"][0] * 100)
+            if agg["low arrive"][0]
+            else "NA"
+        )
+        self.table[2, 0].get_text().set_text(
+            "{:.2f}ms".format(agg["avg"][0]) if agg["avg"][0] else "NA"
+        )
+        self.table[2, 1].get_text().set_text(
+            "{:.2f}ms".format(agg["high"][0]) if agg["high"][0] else "NA"
+        )
+        self.table[2, 2].get_text().set_text(
+            "{:.2f}ms".format(agg["low"][0]) if agg["low"][0] else "NA"
+        )
 
-        result = result.filter(pl.col("duration") != None).select(
-            [
-                "block_id",
-                (pl.col("bct") < pl.col("ddl")).alias("intime"),
-                "prio",
-                "ddl",
-                (pl.col("ddl") / 1000 + pl.col("start")).alias("timestamp"),
-            ]
+        result = (
+            result.filter(pl.col("duration") != None)
+            .select(
+                [
+                    "block_id",
+                    (pl.col("bct") < pl.col("ddl")).alias("intime"),
+                    "prio",
+                    "ddl",
+                    (pl.col("ddl") / 1000 + pl.col("start")).alias("timestamp"),
+                ]
+            )
+            .sort("timestamp")
         )
         x = result["timestamp"].to_numpy()
         y = np.zeros((3, len(x)))
