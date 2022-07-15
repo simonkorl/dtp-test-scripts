@@ -111,18 +111,20 @@ class UpdateData:
 
         self.axs[0].clear()
         self.axs[0].axis("equal")
-        self.axs[0].set_title(self.title + "high")
+        self.axs[0].set_title(self.title + " 高优先级")
         self.axs[0].pie(
             [agg["high complete"][0], agg["high cancel"][0], agg["high wait"][0]],
             labels=["已完成", "已取消", "等待"],
+            autopct="%1.1f%%",
         )
 
         self.axs[1].clear()
         self.axs[1].axis("equal")
-        self.axs[1].set_title(self.title + "low")
+        self.axs[1].set_title(self.title + " 低优先级")
         self.axs[1].pie(
             [agg["low complete"][0], agg["low cancel"][0], agg["low wait"][0]],
             labels=["已完成", "已取消", "等待"],
+            autopct="%1.1f%%",
         )
 
     def calculate(self):
@@ -196,5 +198,5 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots(1, 2)
     update_date = UpdateData(ax, args.trace, args.result, args.title)
-    ani = FuncAnimation(fig, update_date, interval=1000)
+    ani = FuncAnimation(fig, update_date, interval=500)
     plt.show()
