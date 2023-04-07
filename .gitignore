@@ -3,3 +3,6 @@ __pypackages__/
 __pycache__/
 trace*.txt
 *.pcap
+*.png
+*.log
+*.csv

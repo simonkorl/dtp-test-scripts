@@ -1,6 +1,7 @@
 import argparse
 import csv
 import re
+import os
 import polars as pl
 import numpy as np
 import matplotlib.pyplot as plt
@@ -25,6 +26,35 @@ def parse_trace(trace_file_name):
             )
     return pl.from_dicts(trace)
 
+def parse_server_log(server_log_file_name: str) -> pl.DataFrame:
+    """
+    # parse_server_log
+
+    Parse a server log file and return a polars DataFrame.
+
+        Parameters:
+            server_log_file_name (str): The name of the server log file.
+
+        Returns:
+            polars.DataFrame: The parsed server log.
+
+    Format of the server log file:
+        CSV file with following columns:
+        - block_id
+        - start
+        - complete
+        - cancelled
+        - cancelled_passed
+    """
+    try:
+        server_log = pl.read_csv(server_log_file_name)
+        server_log["block_id"] = server_log["block_id"].apply(lambda x: (x >> 2) - 1)
+        return server_log
+    except:
+        return pl.DataFrame(
+            None, ["block_id", "start", "complete", "cancelled", "cancelled_passed"]
+        )
+
 
 def find_unsend(result_file_name, trace_file_name):
     if trace_file_name is not None:
@@ -35,7 +65,9 @@ def find_unsend(result_file_name, trace_file_name):
             reader = csv.DictReader(f)
             result = [((int(row["block_id"]) - 1) >> 2) - 1 for row in reader]
 
-        return sorted([(x, ((x + 1) << 2) + 1) for x in trace - set(result)])
+        res = sorted([(x, ((x + 1) << 2) + 1) for x in trace - set(result)])
+
+        return (len(res), res)
     else:
         raise Exception("trace_file_name is None")
 
@@ -52,10 +84,14 @@ def draw(result_file_name, trace_file_name):
     trace = parse_trace(trace_file_name).rename({"gap": "start"})
     trace["start"] = trace["start"].cumsum()
     result = result.join(trace, left_on="block_id", right_on="id", how="outer")
+    print(result)
     result = result.select(
         [
             "block_id",
-            (pl.col("bct") < pl.col("deadline")).alias("intime"),
+            (pl.col("bct") / 1000 < pl.col("ddl")).alias("intime"),
+            # (
+            #     (pl.col("duration") / 1000) < (pl.col("ddl") + pl.col("start") * 1000)
+            # ).alias("intime"),
             "prio",
             "ddl",
             (pl.col("ddl") / 1e3 + pl.col("start")).alias("timestamp"),
@@ -72,27 +108,74 @@ def draw(result_file_name, trace_file_name):
         if result["intime"][i]:
             y_intime[result["prio"][i]] += 1
         for j in range(8):
-            y[j][i] = y_intime[j] / y_count[j] if y_count[j] > 0 else 0
+            y[j][i] = y_intime[j] / y_count[j] if y_count[j] > 0 else 1
 
     fig, ax = plt.subplots()
-    ax.plot(x, y[0], label="prio 0")
+    # ax.plot(x, y[0], label="prio 0")
     ax.plot(x, y[1], label="prio 1")
     ax.plot(x, y[2], label="prio 2")
-    ax.plot(x, y[3], label="prio 3")
-    ax.plot(x, y[4], label="prio 4")
-    ax.plot(x, y[5], label="prio 5")
-    ax.plot(x, y[6], label="prio 6")
-    ax.plot(x, y[7], label="prio 7")
+    # ax.plot(x, y[3], label="prio 3")
+    # ax.plot(x, y[4], label="prio 4")
+    # ax.plot(x, y[5], label="prio 5")
+    # ax.plot(x, y[6], label="prio 6")
+    # ax.plot(x, y[7], label="prio 7")
 
+    ax.set_ylim(0, 1.05)
     ax.set_xlabel("time (s)")
     ax.set_ylabel("average intime ratio")
     ax.legend()
-    plt.savefig("intime_ratio.png")
 
-    result = result.groupby("prio").agg(
-        [pl.count(), (pl.col("intime") == True).sum()]
-    )
+    plt.savefig(f"{os.path.basename(result_file_name).split('.')[0]}.png")
+
+    result = result.groupby("prio").agg([pl.count(), (pl.col("intime") == True).sum()])
     print(result)
+
+
+def hist(result_file_name, trace_file_name):
+    trace = parse_trace(trace_file_name)
+    # print(
+    #     trace.groupby("prio").agg(
+    #         [
+    #             pl.count(),
+    #             pl.mean("size").alias("size_mean"),
+    #             pl.var("size").alias("size_var"),
+    #         ]
+    #     )
+    # )
+    # trace = trace.partition_by("prio")
+    # prio_1 = trace[0]["size"].to_numpy()
+    # prio_2 = trace[1]["size"].to_numpy()
+
+    # fig, ax = plt.subplots()
+    # ax.hist(prio_1, 100, density=True, label="prio 1")
+    # ax.hist(prio_2, 100, density=True, label="prio 2")
+    # ax.set_xlabel("size (bytes)")
+    # ax.set_ylabel("density")
+    trace = trace["size"].to_numpy()
+    fig, ax = plt.subplots()
+    # ax.plot(trace)
+    ax.scatter(np.arange(len(trace)), trace)
+    plt.savefig("trace_size.png")
+
+    # result = pl.read_csv(result_file_name)
+    # print(
+    #     result.groupby("priority").agg(
+    #         [
+    #             pl.count(),
+    #             pl.mean("bct").alias("bct_mean"),
+    #             pl.var("bct").alias("bct_var"),
+    #         ]
+    #     )
+    # )
+    # result = result.partition_by("priority")
+    # prio_1 = result[0]["bct"].to_numpy()
+    # prio_2 = result[1]["bct"].to_numpy()
+    # fig, ax = plt.subplots()
+    # ax.hist(prio_1, 100, density=True, label="prio 1")
+    # ax.hist(prio_2, 100, density=True, label="prio 2")
+    # ax.set_xlabel("bct (us)")
+    # ax.set_ylabel("density")
+    # plt.savefig("result_bct_hist.png")
 
 
 parser = argparse.ArgumentParser(description="Analyze result")
@@ -122,6 +205,6 @@ if __name__ == "__main__":
         case "draw":
             draw(args.result_file, args.trace_file)
         case "hist":
-            raise Exception("Not implemented")
+            hist(args.result_file, args.trace_file)
         case _:
             raise Exception("Unknown command")

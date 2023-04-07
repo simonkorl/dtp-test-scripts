@@ -1,0 +1,26 @@
+[
+  {
+    "block_num": 1000,
+    "block_size": {
+      "type": "random",
+      "random": {
+        "seed": 2022,
+        "distribution": "choice",
+        "choices": [1300, 1000000],
+        "probability": [0.9, 0.1]
+      }
+    },
+    "block_gap": 0.001,
+    "block_ddl": 500,
+    "block_prio": {
+      "type": "random",
+      "random": {
+        "seed": 2022,
+        "distribution": "choice",
+        "choices": [1, 0],
+        "probability": [0.9, 0.1]
+      }
+    },
+    "trace_file_name": "trace_1M1300_1ms_1000_randchoice19.txt"
+  }
+]
