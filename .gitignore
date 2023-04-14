@@ -6,3 +6,4 @@ trace*.txt
 *.png
 *.log
 *.csv
+!client.log

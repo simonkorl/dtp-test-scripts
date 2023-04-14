@@ -161,3 +161,44 @@ python liveshow.py -t trace.txt -r result.csv -s server_log.csv.csv --title "Liv
 #### ！可能问题
 
 无论是基本功能还是 playback 功能，在数据统计上该脚本可能都存在一些问题，主要的问题围绕着：怎么衡量到达数据的按时完成率。请检查这两个功能的统计结果，对其进行完善！
+
+## log2csv脚本使用说明
+
+该脚本可以将测试过程中生成的client.log转换成可以用来绘图的csv文件
+
+### 使用方法
+需要python 3.10 以上，安装相关库
+
+`pythone log2csv.py ./data`
+只需要指定相关目录即可，会自动到该目录寻找client.log文件。
+
+会在当前目录生成两个文件：
+1. blocks.csv
+2. stats.csv
+### 效果预览
+client.log文件格式
+```log
+peer_addr = 127.0.0.1:5555
+test begin!
+
+BlockID  bct  BlockSize  Priority  Deadline
+         5         1      1235         1       200
+        13         1      1435         1       200
+         9        18    288555         2       200
+      4253         0      2690         2       200
+connection closed, recv=22126 sent=8430 lost=6 rtt=3.547245ms cwnd=14520, total_bytes=29255262, complete_bytes=27969375, good_bytes=27969375, total_time=19804678
+```
+
+生成block.csv文件
+```csv
+BlockID,bct,BlockSize,Priority,Deadline
+5,1,1235,1,200
+13,1,1435,1,200
+9,18,288555,2,200
+17,1,1475,1,200
+```
+生成stats.csv文件
+```csv
+c_recv,c_sent,c_lost,c_rtt(ms),c_cwnd,c_total_bytes,c_complete_bytes,c_good_bytes,c_total_time(us),qoe,retry_times
+22126.0,8430.0,6.0,3.547245,14520.0,29255262.0,27969375.0,9.0,19804678.0,-1,-1
+```
