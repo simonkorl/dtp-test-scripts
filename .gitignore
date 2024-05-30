@@ -2,6 +2,8 @@
 __pypackages__/
 __pycache__/
 trace*.txt
+!data/*
+!imgs/readme/*
 *.pcap
 *.png
 *.log
